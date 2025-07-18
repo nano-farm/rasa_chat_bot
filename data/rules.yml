@@ -1,0 +1,48 @@
+version: "3.1"
+
+rules:
+
+- rule: Say goodbye anytime the user says goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- rule: Say 'I am a bot' anytime the user challenges
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+
+- rule: Respond when user says no after cheer up
+  steps:
+    - intent: deny
+    - action: utter_deny_followup
+
+- rule: Respond to ask_biopower
+  steps:
+    - intent: ask_biopower
+    - action: utter_bio_power
+
+- rule: Respond to ask_services
+  steps:
+    - intent: ask_services
+    - action: utter_ask_services
+
+- rule: Respond to option_1
+  steps:
+    - intent: option_1
+    - action: utter_option_1  
+
+- rule: Respond to option_2
+  steps:
+    - intent: option_2  
+    - action: utter_option_2
+
+- rule: Handle ask_contact
+  steps:
+    - intent: ask_contact
+    - action: utter_ask_contact
+
+- rule: Save message rule
+  steps:
+  - intent: ask_bio
+  - action: action_save_user_message

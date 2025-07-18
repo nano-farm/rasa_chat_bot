@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rasa Chatbot UI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("bpg_logo.png") no-repeat center center;
+      background-size: cover;
+      filter: blur(8px);
+      z-index: -1;
+    }
+
+    #logo-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
+
+    #chat-logo {
+      width: 10cm;
+      height: 5cm;
+      object-fit: contain;
+      filter: drop-shadow(1px 1px 2px black);
+    }
+
+    #chat-wrapper {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 200px;
+    }
+
+    #chat-container {
+      width: 90%;
+      height: 85%;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: transparent;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 80%;
+      word-wrap: break-word;
+      font-size: 16px;
+      color: #111 !important;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: none;
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: none;
+      text-align: left;
+    }
+
+    .message a {
+      color: #007bff !important;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+
+    #user-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+
+    #text-input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #send-button {
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #send-button:hover {
+      background: #45a049;
+    }
+
+    .bot button {
+      margin: 5px 5px 0 0;
+      padding: 8px 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="background"></div>
+
+  <div id="logo-container">
+    <img src="bpg_logo.png" alt="Chatbot Logo" id="chat-logo">
+  </div>
+
+  <div id="chat-wrapper">
+    <div id="chat-container">
+      <div id="chat-box"></div>
+      <div id="user-input">
+        <input type="text" id="text-input" placeholder="Type your message..." />
+        <button id="send-button">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+  
+    const rasaUrl = "http://localhost:5005/webhooks/rest/webhook";
+    const chatBox = document.getElementById("chat-box");
+    const inputField = document.getElementById("text-input");
+    const sendButton = document.getElementById("send-button");
+
+    function appendMessage(sender, text) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = `message ${sender}`;
+      const linkifiedText = text.replace(
+        /(https?:\/\/[^\s]+)/g,
+        '<a href="$1" target="_blank">$1</a>'
+      );
+      msgDiv.innerHTML = linkifiedText;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function appendButtons(buttons) {
+      const btnContainer = document.createElement("div");
+      btnContainer.className = "message bot";
+      buttons.forEach(button => {
+        const btn = document.createElement("button");
+        btn.textContent = button.title;
+        btn.onclick = () => {
+          sendMessage(button.payload, false);  // Don't show payload
+        };
+        btnContainer.appendChild(btn);
+      });
+      chatBox.appendChild(btnContainer);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage(message = null, showUser = true) {
+      message = message || inputField.value.trim();
+      if (!message) return;
+
+      if (showUser) appendMessage("user", message);
+      inputField.value = "";
+
+      try {
+        const response = await fetch(rasaUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sender: "user", message })
+        });
+
+        const data = await response.json();
+        data.forEach(res => {
+          if (res.text) appendMessage("bot", res.text);
+          if (res.buttons) appendButtons(res.buttons);
+          if (res.custom && res.custom.url) {
+            appendMessage("bot", `Click here: <a href="${res.custom.url}" target="_blank">${res.custom.url}</a>`);
+          }
+        });
+
+      } catch (error) {
+        console.error("Error:", error);
+        appendMessage("bot", "❌ Error connecting to Rasa server.");
+      }
+    }
+
+    sendButton.addEventListener("click", () => sendMessage());
+    inputField.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // Auto send /greet on page load
+    window.onload = () => {
+      sendMessage("/greet", false);
+    };
+  </script>
+
+</body>
+</html>

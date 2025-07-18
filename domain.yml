@@ -1,0 +1,67 @@
+version: "3.1"
+
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+  - ask_biopower
+  - ask_services
+  - option_1
+  - option_2
+  - ask_contact
+  - ask_bio
+
+actions:
+  - action_save_user_message
+
+responses:
+  utter_greet:
+    - text: "Hey! Welcome to Bio Power.\nOur mission is to build Organic Energy Worldwide 🌍.\n\nHow can I assist you today?"
+      buttons:
+      - title: "1. New to Bio Power"
+        payload: "/option_1"
+      - title: "2. Queries regarding an existing Bio Power plant"
+        payload: "/option_2"
+
+  utter_cheer_up:
+    - text: "I'm really sorry you're feeling down. Here's something to lift your mood 🌟:<br>https://www.youtube.com/watch?v=d-diB65scQU"
+
+  utter_did_that_help:
+    - text: "Did that help you?"
+
+  utter_happy:
+    - text: "Great, carry on!"
+
+  utter_goodbye:
+    - text: "Bye"
+
+  utter_iamabot:
+    - text: "I am a bot, powered by Bio Power."
+
+  utter_deny_followup:
+    - text: "No worries. I'm here if you need anything else 💬"
+
+  utter_bio_power:
+    - text: "Bio Power is a company that focuses on building organic energy solutions worldwide.<br>We aim to create sustainable energy sources that are environmentally friendly and accessible to all.<br>If you have any specific questions about our projects or initiatives, feel free to ask!"
+
+  utter_ask_services:
+    - text: "We provide 2 kinds of services:<br>1. Bio Gas Plant.<br>&nbsp;&nbsp;i) Commercial.<br>&nbsp;&nbsp;ii) Industrial.<br>&nbsp;&nbsp;iii) Domestic.<br>2. Organic Based Converter."
+
+  utter_option_1:
+    - text: "Great! Here's what we offer for newcomers:<br>- Bio Gas Plant info (Commercial, Industrial, Domestic)<br>- Organic Converter overview<br>- Installation & Support details"
+
+  utter_option_2:
+    - text: "For existing Bio Power plant queries, we can assist with:<br>- Maintenance & Support<br>- Upgrades & Enhancements<br>- Troubleshooting & Issues"
+
+  utter_ask_contact:
+    - text: "You can contact us via:<br>- Email: info@biopower.co.in<br>- Phone: +91 7338129464<br>- Website: https://biopower.co.in/<br>We look forward to hearing from you!"
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
+  
+
