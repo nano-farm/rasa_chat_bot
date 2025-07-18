@@ -1,32 +1,44 @@
-import os
-import requests
+import firebase_admin
+from firebase_admin import credentials, db
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
+from rasa_sdk.events import SlotSet
+from rasa_sdk.interfaces import Action
+import datetime
+import os
 
-class ActionSaveUserMessage(Action):
-    def name(self) -> str:
-        return "action_save_user_message"
+# Initialize Firebase once
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase-adminsdk.json")
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://biopower-a5e93-default-rtdb.firebaseio.com'
+    })
+
+class ActionSaveUnhandledMessage(Action):
+    def name(self):
+        return "action_save_unhandled_message"
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: dict):
-        """
-        Saves the latest user message to Firebase Realtime Database.
-        """
-        user_message = tracker.latest_message.get('text')
-        payload = {
-            "sender": tracker.sender_id,
-            "message": user_message
-        }
 
-        # Use environment variable for the Firebase URL, fallback to default if not set
-        firebase_url = os.getenv("FIREBASE_DB_URL", "https://biopower-a5e93-default-rtdb.firebaseio.com/messages.json")
+        # Get the last user message
+        user_message = tracker.latest_message.get("text")
+        intent_name = tracker.latest_message.get("intent", {}).get("name")
 
-        try:
-            response = requests.post(firebase_url, json=payload, timeout=5)
-            response.raise_for_status()
-            dispatcher.utter_message(text="Your message has been saved!")
-        except requests.RequestException as e:
-            dispatcher.utter_message(text=f"Failed to save your message: {e}")
+        # Only save if it's actually unrecognized
+        if intent_name == "nlu_fallback" or intent_name == "None":
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+            data = {
+                "message": user_message,
+                "timestamp": timestamp
+            }
+
+            # Save to Firebase under /unhandled_messages
+            ref = db.reference('unhandled_messages')
+            ref.push(data)
+
+            # Send fallback message to UI
+            dispatcher.utter_message(text="Sorry, we don't understand it. Please tell us more.")
         return []

@@ -2,127 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rasa Chatbot UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rasa Chatbot</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
+      background: #f0f2f5;
       height: 100vh;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url("bpg_logo.png") no-repeat center center;
-      background-size: cover;
-      filter: blur(8px);
-      z-index: -1;
-    }
-
-    #logo-container {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1;
-    }
-
-    #chat-logo {
-      width: 10cm;
-      height: 5cm;
-      object-fit: contain;
-      filter: drop-shadow(1px 1px 2px black);
-    }
-
-    #chat-wrapper {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 50%;
-      height: 100%;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      padding-top: 200px;
     }
 
     #chat-container {
-      width: 90%;
-      height: 85%;
-      background: rgba(255, 255, 255, 0.95);
+      width: 100%;
+      max-width: 500px;
+      height: 90vh;
+      background: white;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
 
     #chat-box {
       flex: 1;
       padding: 15px;
       overflow-y: auto;
-      background: transparent;
+      border-bottom: 1px solid #ccc;
     }
 
     .message {
       margin: 10px 0;
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
       max-width: 80%;
+      font-size: 15px;
       word-wrap: break-word;
-      font-size: 16px;
-      color: #111 !important;
     }
 
     .user {
       align-self: flex-end;
-      background: none;
-      text-align: right;
-      font-weight: bold;
+      background: #dcf8c6;
     }
 
     .bot {
       align-self: flex-start;
-      background: none;
-      text-align: left;
+      background: #f1f0f0;
     }
 
-    .message a {
-      color: #007bff !important;
+    .bot a {
+      color: #007bff;
       text-decoration: underline;
-      font-weight: bold;
     }
 
     #user-input {
       display: flex;
-      border-top: 1px solid #ccc;
     }
 
     #text-input {
       flex: 1;
       padding: 10px;
-      border: none;
       font-size: 16px;
+      border: none;
       outline: none;
     }
 
     #send-button {
-      padding: 10px 20px;
       background: #4CAF50;
       color: white;
       border: none;
-      cursor: pointer;
+      padding: 10px 16px;
       font-size: 16px;
+      cursor: pointer;
     }
 
     #send-button:hover {
@@ -130,38 +83,34 @@
     }
 
     .bot button {
-      margin: 5px 5px 0 0;
-      padding: 8px 12px;
+      margin-top: 6px;
+      margin-right: 6px;
+      padding: 6px 12px;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
       font-size: 14px;
+      cursor: pointer;
     }
+
+    .bot button:hover {
+      background-color: #0056b3;
+    }
+
   </style>
 </head>
 <body>
 
-  <div class="background"></div>
-
-  <div id="logo-container">
-    <img src="bpg_logo.png" alt="Chatbot Logo" id="chat-logo">
-  </div>
-
-  <div id="chat-wrapper">
-    <div id="chat-container">
-      <div id="chat-box"></div>
-      <div id="user-input">
-        <input type="text" id="text-input" placeholder="Type your message..." />
-        <button id="send-button">Send</button>
-      </div>
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <div id="user-input">
+      <input type="text" id="text-input" placeholder="Type your message..." />
+      <button id="send-button">Send</button>
     </div>
   </div>
 
   <script>
-
-  
     const rasaUrl = "http://localhost:5005/webhooks/rest/webhook";
     const chatBox = document.getElementById("chat-box");
     const inputField = document.getElementById("text-input");
@@ -170,27 +119,23 @@
     function appendMessage(sender, text) {
       const msgDiv = document.createElement("div");
       msgDiv.className = `message ${sender}`;
-      const linkifiedText = text.replace(
-        /(https?:\/\/[^\s]+)/g,
-        '<a href="$1" target="_blank">$1</a>'
-      );
-      msgDiv.innerHTML = linkifiedText;
+      msgDiv.innerHTML = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
       chatBox.appendChild(msgDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     function appendButtons(buttons) {
-      const btnContainer = document.createElement("div");
-      btnContainer.className = "message bot";
+      const container = document.createElement("div");
+      container.className = "message bot";
       buttons.forEach(button => {
         const btn = document.createElement("button");
         btn.textContent = button.title;
         btn.onclick = () => {
-          sendMessage(button.payload, false);  // Don't show payload
+          sendMessage(button.payload, false);
         };
-        btnContainer.appendChild(btn);
+        container.appendChild(btn);
       });
-      chatBox.appendChild(btnContainer);
+      chatBox.appendChild(container);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
@@ -202,36 +147,50 @@
       inputField.value = "";
 
       try {
-        const response = await fetch(rasaUrl, {
+        const res = await fetch(rasaUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sender: "user", message })
         });
 
-        const data = await response.json();
-        data.forEach(res => {
-          if (res.text) appendMessage("bot", res.text);
-          if (res.buttons) appendButtons(res.buttons);
-          if (res.custom && res.custom.url) {
-            appendMessage("bot", `Click here: <a href="${res.custom.url}" target="_blank">${res.custom.url}</a>`);
+        const data = await res.json();
+        data.forEach(response => {
+          if (response.text) appendMessage("bot", response.text);
+          if (response.buttons) appendButtons(response.buttons);
+          if (response.custom && response.custom.url) {
+            appendMessage("bot", `🔗 <a href="${response.custom.url}" target="_blank">${response.custom.url}</a>`);
           }
         });
 
-      } catch (error) {
-        console.error("Error:", error);
-        appendMessage("bot", "❌ Error connecting to Rasa server.");
+      } catch (err) {
+        console.error("Error:", err);
+        appendMessage("bot", "❌ Unable to connect to Rasa server.");
       }
     }
 
     sendButton.addEventListener("click", () => sendMessage());
-    inputField.addEventListener("keydown", (e) => {
+    inputField.addEventListener("keydown", e => {
       if (e.key === "Enter") sendMessage();
     });
 
-    // Auto send /greet on page load
     window.onload = () => {
       sendMessage("/greet", false);
     };
+     WebChat.default.init({
+    selector: "#webchat",
+    initPayload: "/greet",
+    customData: {"language": "en"},
+    socketUrl: "http://localhost:5005",
+    socketPath: "/socket.io/",
+    title: "Bio Power Bot",
+    subtitle: "Ask me anything about Bio Power!",
+    inputTextFieldHint: "Type a message...",
+    showFullScreenButton: true,
+    profileAvatar: "bot_avatar.png",
+    params: {
+      storage: "session"
+    }
+  });
   </script>
 
 </body>

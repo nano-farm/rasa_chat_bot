@@ -16,7 +16,9 @@ intents:
   - ask_bio
 
 actions:
+  - action_save_unhandled_message
   - action_save_user_message
+
 
 responses:
   utter_greet:
@@ -27,6 +29,7 @@ responses:
       - title: "2. Queries regarding an existing Bio Power plant"
         payload: "/option_2"
 
+ 
   utter_cheer_up:
     - text: "I'm really sorry you're feeling down. Here's something to lift your mood 🌟:<br>https://www.youtube.com/watch?v=d-diB65scQU"
 
@@ -59,6 +62,9 @@ responses:
 
   utter_ask_contact:
     - text: "You can contact us via:<br>- Email: info@biopower.co.in<br>- Phone: +91 7338129464<br>- Website: https://biopower.co.in/<br>We look forward to hearing from you!"
+
+  utter_fallback:
+    - text: "Sorry, I didn't understand that. Can you try rephrasing?"
 
 session_config:
   session_expiration_time: 60

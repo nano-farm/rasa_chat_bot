@@ -26,6 +26,7 @@ rules:
   steps:
     - intent: ask_services
     - action: utter_ask_services
+    - action: action_save_user_message
 
 - rule: Respond to option_1
   steps:
@@ -46,3 +47,15 @@ rules:
   steps:
   - intent: ask_bio
   - action: action_save_user_message
+
+- rule: Handle unrecognized message and save it
+  steps:
+    - intent: nlu_fallback
+    - action: action_save_unhandled_message
+
+
+- rule: Greet the user
+  steps:
+    - intent: greet
+    - action: utter_greet
+
